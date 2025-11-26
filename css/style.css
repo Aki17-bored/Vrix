@@ -1,0 +1,488 @@
+/* ==============================
+   VRIX – GLOBAL THEME
+============================== */
+:root {
+    --bg: #020617;
+    --card: #020617;
+    --text: #e2e8f0;
+    --soft: #94a3b8;
+    --primary: #22c55e;
+    --primary-soft: rgba(34, 197, 94, 0.26);
+    --border: #1f2937;
+    --radius: 16px;
+}
+
+/* light mode */
+.light {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --soft: #64748b;
+    --border: #e2e8f0;
+}
+
+/* base */
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* scrollbar */
+*::-webkit-scrollbar {
+    width: 6px;
+}
+*::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 8px;
+}
+
+/* ==============================
+   HEADER / NAV
+============================== */
+.top-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.logo-icon {
+    width: 26px;   /* adjust size as you like */
+    height: 26px;
+    object-fit: contain;
+}
+nav {
+    display: flex;
+    gap: 18px;
+    font-size: 0.9rem;
+}
+nav a {
+    color: var(--soft);
+    text-decoration: none;
+    font-weight: 500;
+}
+nav a.active {
+    color: var(--primary);
+}
+.theme-btn {
+    border-radius: 999px;
+    border: 1px solid var(--soft);
+    background: transparent;
+    color: var(--text);
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+/* ==============================
+   LAYOUT
+============================== */
+.container {
+    padding: 18px 18px 26px;
+}
+h1 {
+    margin: 0 0 4px;
+    font-size: 1.6rem;
+}
+h2 {
+    margin: 0;
+}
+.small {
+    font-size: 0.88rem;
+    color: var(--soft);
+}
+
+/* cards */
+.card, .todo-box, .month-shell {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+}
+
+/* ==============================
+   WEEKLY DASHBOARD
+============================== */
+.week-board {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(170px, 1fr));
+    gap: 10px;
+}
+.day-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.day-past {
+    opacity: 0.7;
+}
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+.day-name {
+    font-weight: 600;
+    font-size: 0.98rem;
+}
+.day-date {
+    font-size: 0.8rem;
+    color: var(--soft);
+}
+
+/* ring */
+.ring {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: conic-gradient(var(--primary) calc(var(--p) * 1%), #334155 0);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.ring::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    background: var(--card);
+    border-radius: 50%;
+}
+.ring-value {
+    position: relative;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.ring-caption {
+    font-size: 0.8rem;
+    color: var(--soft);
+    text-align: center;
+}
+
+/* tasks in day */
+.task-list {
+    max-height: 150px;
+    overflow-y: auto;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(148, 163, 184, 0.4);
+}
+.task-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    background: rgba(15, 23, 42, 0.8);
+}
+.task-row.completed {
+    background: var(--primary-soft);
+    border: 1px solid var(--primary);
+}
+.task-title {
+    flex: 1;
+    font-size: 0.85rem;
+}
+.delete-btn {
+    border: none;
+    background: transparent;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.add-task {
+    margin-top: 6px;
+    display: flex;
+    gap: 6px;
+}
+.add-task input {
+    flex: 1;
+    padding: 5px 7px;
+    border-radius: 999px;
+    border: 1px solid #334155;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.8rem;
+}
+.add-task button {
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: none;
+    background: var(--primary);
+    color: #0f172a;
+    cursor: pointer;
+}
+.add-task button:hover {
+    filter: brightness(1.05);
+}
+
+/* ==============================
+   DAILY TODO DASHBOARD
+============================== */
+.todo-box {
+    margin-top: 22px;
+}
+.todo-title {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+#todoForm {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+#todoForm input {
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: 999px;
+    border: 1px solid #334155;
+    background: transparent;
+    color: var(--text);
+}
+#todoForm button {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #0f172a;
+    border: none;
+    cursor: pointer;
+}
+#todoList .task-row {
+    margin-bottom: 6px;
+}
+
+/* ==============================
+   PHONE-STYLE MONTH VIEW
+============================== */
+.month-shell {
+    margin-top: 16px;
+}
+
+/* header year/month */
+.month-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+.month-label {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+.month-nav {
+    background: transparent;
+    border: 1px solid #475569;
+    color: var(--text);
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+/* weekday row */
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-size: 0.78rem;
+    color: var(--soft);
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+/* grid of days */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 12px;
+}
+
+/* individual day */
+.calendar-cell {
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+.calendar-cell.disabled {
+    cursor: default;
+    opacity: 0.2;
+}
+.day-number {
+    min-width: 26px;
+    height: 26px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.86rem;
+}
+.calendar-cell.today .day-number {
+    background: #2563eb;
+    color: #ffffff;
+}
+.calendar-cell.selected .day-number {
+    outline: 1px solid var(--primary);
+}
+.calendar-cell.has-event::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+.calendar-info {
+    margin-top: 18px;
+    font-size: 0.9rem;
+    color: var(--soft);
+    text-align: center;
+}
+
+/* ==============================
+   CHARTS
+============================== */
+.chart-card {
+    margin-top: 18px;
+}
+.chart-card canvas {
+    width: 100%;
+    height: 180px;
+    display: block;
+}
+#overallStatsChart {
+    height: 90px;
+}
+
+/* ==============================
+   SETTINGS
+============================== */
+.settings-list {
+    margin-top: 20px;
+    display: grid;
+    gap: 12px;
+}
+.settings-item {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 12px;
+}
+.settings-item button {
+    margin-top: 8px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: none;
+    background: var(--primary);
+    color: #0f172a;
+    cursor: pointer;
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+@media (max-width: 960px) {
+    .week-board {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    nav {
+        display: none;
+    }
+}
+@media (max-width: 640px) {
+    .week-board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+/* ---------- Calendar event panel ---------- */
+.calendar-panel {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.calendar-panel-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.calendar-panel-date {
+    font-size: 0.85rem;
+    color: var(--soft);
+    margin-bottom: 6px;
+}
+
+.calendar-panel-events {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.calendar-event-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.calendar-event-row span {
+    flex: 1;
+}
+
+.calendar-event-delete {
+    border: none;
+    background: transparent;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.calendar-event-form {
+    display: flex;
+    gap: 6px;
+}
+
+.calendar-event-form input {
+    flex: 1;
+    padding: 5px 7px;
+    border-radius: 999px;
+    border: 1px solid #334155;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.8rem;
+}
+
+.calendar-event-form button {
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: none;
+    background: var(--primary);
+    color: #0f172a;
+    cursor: pointer;
+}

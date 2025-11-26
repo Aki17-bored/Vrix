@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vrix – Weekly & Monthly</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+<header class="top-header">
+  <div class="logo">Vrix</div>
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="weekly.html" class="active">Weekly & Monthly</a>
+    <a href="monthly.html">Calendar</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+  <button id="themeToggle" class="theme-btn">🌙</button>
+</header>
+
+<main class="container">
+  <h1>Weekly & Monthly Dashboard</h1>
+  <p class="small">See completions for this week and last 4 weeks, plus your monthly calendar.</p>
+
+  <section style="margin-top:18px;display:grid;grid-template-columns:minmax(0,1.3fr)minmax(0,1fr);gap:14px;">
+    <div>
+      <div class="todo-box chart-card">
+        <h2 class="todo-title">Weekly completions</h2>
+        <canvas id="weeklyStatsChart"></canvas>
+        <p id="weeklyStatsText" class="small" style="margin-top:8px;"></p>
+      </div>
+      <div class="todo-box chart-card">
+        <h2 class="todo-title">Monthly completions (last 4 weeks)</h2>
+        <canvas id="monthlyStatsChart"></canvas>
+        <p id="monthlyStatsText" class="small" style="margin-top:8px;"></p>
+      </div>
+    </div>
+    <div class="todo-box chart-card">
+      <h2 class="todo-title">Overall progress (current week)</h2>
+      <canvas id="overallStatsChart"></canvas>
+      <p id="overallStatsText" class="small" style="margin-top:8px;"></p>
+      <p class="small" style="margin-top:6px;">Counts all tasks scheduled in the current week.</p>
+    </div>
+  </section>
+
+  <section style="margin-top:24px;">
+ 
