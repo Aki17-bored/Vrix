@@ -369,3 +369,60 @@ nav a.active {
         padding-bottom: 90px; /* Leave space for bottom nav */
     }
 }
+
+/* ==============================
+   MOBILE BOTTOM NAV
+   (applies on phones & small tablets)
+============================== */
+@media (max-width: 900px) {
+
+  /* leave room so content isn't hidden behind nav */
+  body {
+    padding-bottom: 70px;
+  }
+
+  /* top header still at top, but just logo + theme button visually */
+  .top-header {
+    padding: 10px 14px;
+  }
+
+  /* bottom bar */
+  nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -6px 18px rgba(0,0,0,0.7);
+
+    padding: 0 6px;
+    z-index: 100;
+  }
+
+  nav a {
+    flex: 1;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 6px 0 4px;
+    border-bottom: none;               /* remove desktop underline */
+    border-radius: 999px;
+    color: var(--soft);
+  }
+
+  nav a.active {
+    background: rgba(34,197,94,0.18);
+    color: var(--primary);
+  }
+
+  /* main content padding */
+  .container {
+    padding: 14px 14px 80px;           /* bottom = space for bar */
+  }
+}
