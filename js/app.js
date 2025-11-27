@@ -1,55 +1,70 @@
 // ==============================
-// Vrix – core logic (one JS for all pages)
+// Vrix – core logic
 // ==============================
 
 const STORAGE_KEYS = {
   dayTasks: "vrix.dayTasks",
-  todos: "vrix.todos",
+  habits: "vrix.habits",
+  habitLog: "vrix.habitLog",
   events: "vrix.events",
+  dailyNotes: "vrix.dailyNotes",
   theme: "vrix.theme",
 };
 
-let dayTasks = [];   // {id,date,title,done}
-let todos = [];      // {id,title,done}
-let events = [];     // {id,date,title}
+let dayTasks = [];
+let habits = [];
+let habitLog = {};
+let events = [];
+let dailyNotes = {};
 
 let calendarCursor = null;
 let selectedDateKey = null;
 
-// ---------- storage ----------
+// ==============================
+// Load + Save
+// ==============================
+
 function loadState() {
-  try {
-    dayTasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.dayTasks)) || [];
-    todos = JSON.parse(localStorage.getItem(STORAGE_KEYS.todos)) || [];
-    events = JSON.parse(localStorage.getItem(STORAGE_KEYS.events)) || [];
-  } catch (e) {
-    dayTasks = [];
-    todos = [];
-    events = [];
-  }
+  try { dayTasks = JSON.parse(localStorage.getItem(STORAGE_KEYS.dayTasks)) || []; } catch { dayTasks = []; }
+  try { habits = JSON.parse(localStorage.getItem(STORAGE_KEYS.habits)) || []; } catch { habits = []; }
+  try { habitLog = JSON.parse(localStorage.getItem(STORAGE_KEYS.habitLog)) || {}; } catch { habitLog = {}; }
+  try { events = JSON.parse(localStorage.getItem(STORAGE_KEYS.events)) || []; } catch { events = []; }
+  try { dailyNotes = JSON.parse(localStorage.getItem(STORAGE_KEYS.dailyNotes)) || {}; } catch { dailyNotes = {}; }
 }
+
 function saveDayTasks() {
   localStorage.setItem(STORAGE_KEYS.dayTasks, JSON.stringify(dayTasks));
 }
-function saveTodos() {
-  localStorage.setItem(STORAGE_KEYS.todos, JSON.stringify(todos));
+function saveHabits() {
+  localStorage.setItem(STORAGE_KEYS.habits, JSON.stringify(habits));
+}
+function saveHabitLog() {
+  localStorage.setItem(STORAGE_KEYS.habitLog, JSON.stringify(habitLog));
 }
 function saveEvents() {
   localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
 }
+function saveDailyNotes() {
+  localStorage.setItem(STORAGE_KEYS.dailyNotes, JSON.stringify(dailyNotes));
+}
 
-// ---------- date helpers ----------
+// ==============================
+// Date Helpers
+// ==============================
+
 function formatDateKey(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+
 function todayStart() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
   return d;
 }
+
 function getStartOfWeek(date) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -57,6 +72,7 @@ function getStartOfWeek(date) {
   d.setDate(d.getDate() - day);
   return d;
 }
+
 function getCurrentWeekDates() {
   const start = getStartOfWeek(new Date());
   const arr = [];
@@ -68,17 +84,54 @@ function getCurrentWeekDates() {
   return arr;
 }
 
-// ---------- theme ----------
+// ==============================
+// Parse title for 🎯 priority + #tags
+// ==============================
+
+function parseTitleAndTags(raw) {
+  if (!raw) return { baseTitle: "", tags: [], priority: false };
+
+  let priority = false;
+  let words = raw.split(/\s+/);
+  const baseWords = [];
+  const tags = [];
+
+  for (let w of words) {
+    if (!w) continue;
+
+    if (w.includes("🎯")) {
+      priority = true;
+      w = w.replace(/🎯/g, "").trim();
+      if (!w) continue;
+    }
+
+    if (w.startsWith("#") && w.length > 1) {
+      const cleaned = w.replace(/[^#\w-]/g, "");
+      if (cleaned.length > 1) tags.push(cleaned);
+    } else {
+      baseWords.push(w);
+    }
+  }
+
+  return { baseTitle: baseWords.join(" "), tags, priority };
+}
+
+// ==============================
+// Theme
+// ==============================
+
 function applyTheme(theme) {
   const root = document.documentElement;
   if (theme === "light") root.classList.add("light");
   else root.classList.remove("light");
   localStorage.setItem(STORAGE_KEYS.theme, theme);
 }
+
 function initTheme() {
   const saved = localStorage.getItem(STORAGE_KEYS.theme);
   const theme = saved === "light" ? "light" : "dark";
   applyTheme(theme);
+
   const toggle = document.getElementById("themeToggle");
   if (toggle) {
     toggle.textContent = theme === "light" ? "🌙" : "☀️";
@@ -91,10 +144,24 @@ function initTheme() {
   }
 }
 
-// ---------- data helpers ----------
+// ==============================
+// Splash Screen
+// ==============================
+
+function initSplash() {
+  const s = document.getElementById("splash");
+  if (!s) return;
+  setTimeout(() => s.classList.add("splash-hide"), 900);
+}
+
+// ==============================
+// Tasks for Day
+// ==============================
+
 function getTasksForDate(dateKey) {
   return dayTasks.filter(t => t.date === dateKey);
 }
+
 function addTask(dateKey, title) {
   dayTasks.push({
     id: `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -104,50 +171,107 @@ function addTask(dateKey, title) {
   });
   saveDayTasks();
 }
+
 function toggleTaskDone(id, done) {
   const t = dayTasks.find(x => x.id === id);
   if (!t) return;
   t.done = done;
   saveDayTasks();
 }
+
 function deleteTask(id) {
   dayTasks = dayTasks.filter(t => t.id !== id);
   saveDayTasks();
 }
 
-function addTodo(title) {
-  todos.push({
-    id: `todo_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    title: title.trim(),
-    done: false,
-  });
-  saveTodos();
-}
-function toggleTodoDone(id, done) {
-  const t = todos.find(x => x.id === id);
-  if (!t) return;
-  t.done = done;
-  saveTodos();
-}
-function deleteTodo(id) {
-  todos = todos.filter(t => t.id !== id);
-  saveTodos();
-}
+// ==============================
+// Habits + streak
+// ==============================
 
-function addEvent(dateKey, title) {
-  events.push({
-    id: `ev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    date: dateKey,
+function addHabit(title) {
+  habits.push({
+    id: `h_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
     title: title.trim(),
   });
-  saveEvents();
-}
-function deleteEvent(id) {
-  events = events.filter(e => e.id !== id);
-  saveEvents();
+  saveHabits();
 }
 
-// ---------- weekly dashboard ----------
+function deleteHabit(id) {
+  habits = habits.filter(h => h.id !== id);
+  saveHabits();
+
+  Object.keys(habitLog).forEach(d => {
+    if (habitLog[d] && habitLog[d][id]) {
+      delete habitLog[d][id];
+      if (Object.keys(habitLog[d]).length === 0) delete habitLog[d];
+    }
+  });
+  saveHabitLog();
+}
+
+function isHabitDoneOn(habitId, dateKey) {
+  const row = habitLog[dateKey];
+  return !!(row && row[habitId]);
+}
+
+function setHabitDoneOn(habitId, dateKey, done) {
+  const row = habitLog[dateKey] || {};
+  if (done) row[habitId] = true;
+  else delete row[habitId];
+
+  if (Object.keys(row).length === 0) delete habitLog[dateKey];
+  else habitLog[dateKey] = row;
+
+  saveHabitLog();
+}
+
+function getHabitCurrentStreak(habitId) {
+  let streak = 0;
+  const d = todayStart();
+  for (let i = 0; i < 365; i++) {
+    const key = formatDateKey(d);
+    if (isHabitDoneOn(habitId, key)) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+  return streak;
+}
+
+function getOverallStreak() {
+  let s = 0;
+  const d = todayStart();
+  for (let i = 0; i < 365; i++) {
+    const k = formatDateKey(d);
+    const row = habitLog[k];
+    const any = row && Object.keys(row).length > 0;
+    if (any) {
+      s++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+  return s;
+}
+
+// ==============================
+// Notes / Reflections
+// ==============================
+
+function getNoteForDate(k) {
+  return dailyNotes[k] || "";
+}
+
+function setNoteForDate(k, text) {
+  if (text.trim()) dailyNotes[k] = text;
+  else delete dailyNotes[k];
+
+  saveDailyNotes();
+}
+
+// ==============================
+// WEEKLY BOARD (Dashboard)
+// ==============================
+
 function renderWeeklyBoard() {
   const container = document.getElementById("weekBoard");
   if (!container) return;
@@ -159,15 +283,17 @@ function renderWeeklyBoard() {
   const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
   weekDates.forEach((d, idx) => {
-    const dateKey = formatDateKey(d);
+    const key = formatDateKey(d);
     const isPast = d < today;
     const isToday = d.getTime() === today.getTime();
+    const isFuture = d > today;
 
-    const dayBox = document.createElement("div");
-    dayBox.className = "day-box";
-    if (isPast) dayBox.classList.add("day-past");
+    const box = document.createElement("div");
+    box.className = "day-box";
+    if (isPast) box.classList.add("day-past");
+    if (isFuture) box.classList.add("day-future");
 
-    // header
+    // Header
     const header = document.createElement("div");
     header.className = "day-header";
 
@@ -175,113 +301,148 @@ function renderWeeklyBoard() {
     const nameEl = document.createElement("div");
     nameEl.className = "day-name";
     nameEl.textContent = dayNames[idx];
+
     const dateEl = document.createElement("div");
     dateEl.className = "day-date";
     dateEl.textContent = d.toLocaleDateString(undefined, {
       day: "2-digit",
       month: "short",
     });
+
     left.appendChild(nameEl);
     left.appendChild(dateEl);
     header.appendChild(left);
 
     if (isToday) {
-      const todayTag = document.createElement("div");
-      todayTag.style.fontSize = "0.7rem";
-      todayTag.style.padding = "2px 8px";
-      todayTag.style.borderRadius = "999px";
-      todayTag.style.border = "1px solid rgba(34,197,94,0.6)";
-      todayTag.textContent = "Today";
-      header.appendChild(todayTag);
+      const t = document.createElement("div");
+      t.style.fontSize = "0.7rem";
+      t.style.padding = "2px 8px";
+      t.style.borderRadius = "999px";
+      t.style.border = "1px solid rgba(34,197,94,0.6)";
+      t.textContent = "Today";
+      header.appendChild(t);
     }
 
-    dayBox.appendChild(header);
+    box.appendChild(header);
 
-    // ring
-    const tasksForDay = getTasksForDate(dateKey);
-    const doneCount = tasksForDay.filter(t => t.done).length;
-    const total = tasksForDay.length || 1;
-    const percent = tasksForDay.length ? Math.round((doneCount / total) * 100) : 0;
+    // Ring
+    const tasks = getTasksForDate(key);
+    const done = tasks.filter(t => t.done).length;
+    const totalProgressBase = isFuture ? 0 : tasks.length;
+    const tot = totalProgressBase || 1;
+    const percent = totalProgressBase ? Math.round((done / totalProgressBase) * 100) : 0;
 
     const ring = document.createElement("div");
     ring.className = "ring";
     ring.style.setProperty("--p", String(percent));
-    const rv = document.createElement("div");
-    rv.className = "ring-value";
-    rv.textContent = `${percent}%`;
-    ring.appendChild(rv);
-    dayBox.appendChild(ring);
+
+    const val = document.createElement("div");
+    val.className = "ring-value";
+    val.textContent = `${percent}%`;
+    ring.appendChild(val);
+
+    box.appendChild(ring);
 
     const cap = document.createElement("div");
     cap.className = "ring-caption";
-    cap.textContent =
-      tasksForDay.length === 0
-        ? isPast ? "No tasks recorded." : "No tasks yet."
-        : `${doneCount}/${tasksForDay.length} tasks done`;
-    dayBox.appendChild(cap);
+    if (tasks.length === 0) {
+      if (isPast) cap.textContent = "No tasks recorded.";
+      else if (isFuture) cap.textContent = "No tasks planned yet.";
+      else cap.textContent = "No tasks yet.";
+    } else {
+      if (isFuture) cap.textContent = `${tasks.length} planned`;
+      else cap.textContent = `${done}/${tasks.length} done`;
+    }
+    box.appendChild(cap);
 
-    // list
+    // List
     const list = document.createElement("div");
     list.className = "task-list";
-    if (tasksForDay.length === 0) {
+
+    if (tasks.length === 0) {
       const empty = document.createElement("div");
-      empty.style.fontSize = "0.8rem";
       empty.style.color = "var(--soft)";
+      empty.style.fontSize = "0.8rem";
       empty.textContent = "No tasks.";
       list.appendChild(empty);
     } else {
-      tasksForDay.forEach(task => {
+      tasks.forEach(t => {
         const row = document.createElement("div");
-        row.className = "task-row";
-        if (task.done) row.classList.add("completed");
-        if (isPast) row.classList.add("past");
+        row.className = "task-row task-row-appear";   // <-- animation class
+
+        const meta = parseTitleAndTags(t.title);
+        if (t.done && !isFuture) row.classList.add("completed");
+        if (meta.priority) row.classList.add("priority-row");
 
         const cb = document.createElement("input");
         cb.type = "checkbox";
-        cb.checked = task.done;
-        cb.disabled = isPast;
+        cb.checked = t.done;
+        cb.disabled = isPast || isFuture;
         cb.addEventListener("change", () => {
-          toggleTaskDone(task.id, cb.checked);
+          toggleTaskDone(t.id, cb.checked);
           renderAll();
         });
 
-        const title = document.createElement("div");
-        title.className = "task-title";
-        title.textContent = task.title;
+        const main = document.createElement("div");
+        main.className = "task-main";
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "task-title";
+        titleEl.textContent = meta.baseTitle || t.title;
+        main.appendChild(titleEl);
+
+        if (meta.tags.length || meta.priority) {
+          const tagRow = document.createElement("div");
+          tagRow.className = "tag-row";
+          if (meta.priority) {
+            const p = document.createElement("span");
+            p.className = "tag-pill priority-pill";
+            p.textContent = "🎯 Priority";
+            tagRow.appendChild(p);
+          }
+          meta.tags.forEach(tag => {
+            const pill = document.createElement("span");
+            pill.className = "tag-pill";
+            pill.textContent = tag;
+            tagRow.appendChild(pill);
+          });
+          main.appendChild(tagRow);
+        }
 
         const del = document.createElement("button");
         del.className = "delete-btn";
         del.textContent = "🗑";
         del.addEventListener("click", () => {
-          // instant delete, no browser confirm
-          deleteTask(task.id);
+          deleteTask(t.id);
           renderAll();
         });
 
         row.appendChild(cb);
-        row.appendChild(title);
+        row.appendChild(main);
         row.appendChild(del);
         list.appendChild(row);
       });
     }
-    dayBox.appendChild(list);
 
-    // add task / locked
+    box.appendChild(list);
+
     const addWrap = document.createElement("div");
     if (isPast) {
       const info = document.createElement("div");
-      info.style.fontSize = "0.78rem";
       info.style.color = "var(--soft)";
       info.textContent = "Past day – no new tasks.";
+      info.style.fontSize = "0.78rem";
       addWrap.appendChild(info);
     } else {
       const form = document.createElement("form");
       form.className = "add-task";
-      form.dataset.date = dateKey;
+      form.dataset.date = key;
 
       const input = document.createElement("input");
       input.type = "text";
-      input.placeholder = "Add task…";
+      input.placeholder = isFuture
+        ? "Plan a task (🎯, #tags)…"
+        : "Add a task (🎯, #tags)…";
 
       const btn = document.createElement("button");
       btn.type = "submit";
@@ -289,89 +450,237 @@ function renderWeeklyBoard() {
 
       form.appendChild(input);
       form.appendChild(btn);
+
       form.addEventListener("submit", e => {
         e.preventDefault();
         const v = input.value.trim();
         if (!v) return;
-        addTask(dateKey, v);
+        addTask(key, v);
         input.value = "";
         renderAll();
       });
 
       addWrap.appendChild(form);
     }
-    dayBox.appendChild(addWrap);
 
-    container.appendChild(dayBox);
+    box.appendChild(addWrap);
+    container.appendChild(box);
   });
+
+  const tl = document.getElementById("todayLabel");
+  if (tl) {
+    const t = todayStart();
+    tl.textContent = t.toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
 }
 
-// ---------- Todo dashboard ----------
-function renderTodoDashboard() {
-  const form = document.getElementById("todoForm");
-  const list = document.getElementById("todoList");
-  if (!form || !list) return;
+// ==============================
+// Habits Section
+// ==============================
 
+function renderHabitsSection() {
+  const list = document.getElementById("habitList");
+  const streakText = document.getElementById("overallStreakText");
+  const form = document.getElementById("habitForm");
+  if (!list) return;
+
+  const todayKey = formatDateKey(todayStart());
   list.innerHTML = "";
-  if (todos.length === 0) {
+
+  if (habits.length === 0) {
     const empty = document.createElement("div");
-    empty.style.fontSize = "0.9rem";
     empty.style.color = "var(--soft)";
-    empty.textContent = "No daily to-dos. Add one below.";
+    empty.textContent = "No habits yet.";
+    empty.style.fontSize = "0.9rem";
     list.appendChild(empty);
   } else {
-    todos.forEach(t => {
+    habits.forEach(h => {
       const row = document.createElement("div");
-      row.className = "task-row";
-      if (t.done) row.classList.add("completed");
+      row.className = "task-row task-row-appear";   // <-- animation class
+
+      const meta = parseTitleAndTags(h.title);
+      if (meta.priority) row.classList.add("priority-row");
 
       const cb = document.createElement("input");
       cb.type = "checkbox";
-      cb.checked = t.done;
+      cb.checked = isHabitDoneOn(h.id, todayKey);
       cb.addEventListener("change", () => {
-        toggleTodoDone(t.id, cb.checked);
-        renderTodoDashboard();
+        setHabitDoneOn(h.id, todayKey, cb.checked);
+        renderHabitsSection();
       });
+
+      const wrap = document.createElement("div");
+      wrap.className = "task-main";
 
       const title = document.createElement("div");
       title.className = "task-title";
-      title.textContent = t.title;
+      const streak = getHabitCurrentStreak(h.id);
+      title.textContent =
+        (meta.baseTitle || h.title) + (streak > 0 ? `  🔥 ${streak}` : "");
+      wrap.appendChild(title);
+
+      if (meta.tags.length || meta.priority) {
+        const tagRow = document.createElement("div");
+        tagRow.className = "tag-row";
+
+        if (meta.priority) {
+          const p = document.createElement("span");
+          p.className = "tag-pill priority-pill";
+          p.textContent = "🎯 Priority";
+          tagRow.appendChild(p);
+        }
+
+        meta.tags.forEach(tag => {
+          const pill = document.createElement("span");
+          pill.className = "tag-pill";
+          pill.textContent = tag;
+          tagRow.appendChild(pill);
+        });
+
+        wrap.appendChild(tagRow);
+      }
 
       const del = document.createElement("button");
       del.className = "delete-btn";
       del.textContent = "🗑";
       del.addEventListener("click", () => {
-        // instant delete, no browser confirm
-        deleteTodo(t.id);
-        renderTodoDashboard();
+        deleteHabit(h.id);
+        renderHabitsSection();
       });
 
       row.appendChild(cb);
-      row.appendChild(title);
+      row.appendChild(wrap);
       row.appendChild(del);
       list.appendChild(row);
     });
   }
 
-  if (!form._bound) {
+  if (form && !form._bound) {
     form.addEventListener("submit", e => {
       e.preventDefault();
-      const input = document.getElementById("todoInput");
+      const input = document.getElementById("habitInput");
       if (!input) return;
       const v = input.value.trim();
       if (!v) return;
-      addTodo(v);
+      addHabit(v);
       input.value = "";
-      renderTodoDashboard();
+      renderHabitsSection();
     });
     form._bound = true;
   }
+
+  if (streakText) {
+    const overall = getOverallStreak();
+    if (overall === 0) {
+      streakText.textContent = "No streak yet. Start by ticking a habit today.";
+    } else {
+      streakText.textContent = `Overall streak: ${overall} day${overall !== 1 ? "s" : ""} 🔥`;
+    }
+  }
 }
 
-// ---------- phone-style monthly calendar ----------
+// ==============================
+// Reflection Section
+// ==============================
+
+function renderReflectionSection() {
+  const ta = document.getElementById("todayNote");
+  if (!ta) return;
+
+  const key = formatDateKey(todayStart());
+  ta.value = getNoteForDate(key);
+
+  if (!ta._bound) {
+    ta.addEventListener("input", () => {
+      setNoteForDate(key, ta.value);
+    });
+    ta._bound = true;
+  }
+}
+
+// ==============================
+// Today Completed Summary
+// ==============================
+
+function renderTodaySummary() {
+  const textEl = document.getElementById("todayCompletedText");
+  const tagBox = document.getElementById("todayTagSummary");
+  if (!textEl || !tagBox) return;
+
+  const key = formatDateKey(todayStart());
+
+  const habitsDone = habits.filter(h => isHabitDoneOn(h.id, key));
+  const totalHabits = habits.length;
+
+  const tasksToday = dayTasks.filter(t => t.date === key);
+  const tasksDone = tasksToday.filter(t => t.done);
+  const totalTasks = tasksToday.length;
+
+  let priorityDone = 0;
+
+  habitsDone.forEach(h => {
+    const meta = parseTitleAndTags(h.title);
+    if (meta.priority) priorityDone++;
+  });
+
+  tasksDone.forEach(t => {
+    const meta = parseTitleAndTags(t.title);
+    if (meta.priority) priorityDone++;
+  });
+
+  const totalCompleted = habitsDone.length + tasksDone.length;
+
+  if (totalHabits || totalTasks) {
+    textEl.textContent =
+      `Habits: ${habitsDone.length}/${totalHabits} · ` +
+      `Tasks: ${tasksDone.length}/${totalTasks} · ` +
+      `Total: ${totalCompleted}` +
+      (priorityDone > 0 ? ` · 🎯 ${priorityDone}` : "");
+  } else {
+    textEl.textContent = "Nothing completed yet.";
+  }
+
+  tagBox.innerHTML = "";
+  const counts = {};
+
+  [...habitsDone, ...tasksDone].forEach(item => {
+    const meta = parseTitleAndTags(item.title);
+    meta.tags.forEach(tag => {
+      const key = tag.toLowerCase();
+      if (!counts[key]) counts[key] = { label: tag, count: 0 };
+      counts[key].count++;
+    });
+  });
+
+  const entries = Object.values(counts).sort((a, b) => b.count - a.count);
+  if (entries.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "tag-summary-empty";
+    empty.textContent = "No tagged activity today.";
+    tagBox.appendChild(empty);
+    return;
+  }
+
+  entries.slice(0, 6).forEach(entry => {
+    const pill = document.createElement("span");
+    pill.className = "tag-pill";
+    pill.textContent = `${entry.label} · ${entry.count}`;
+    tagBox.appendChild(pill);
+  });
+}
+
+// ==============================
+// Monthly Calendar
+// ==============================
+
 function renderMonthlyCalendar() {
   const cal = document.getElementById("calendar");
-  const labelEl = document.getElementById("monthLabel");
+  const label = document.getElementById("monthLabel");
   if (!cal) return;
 
   if (!calendarCursor) {
@@ -379,54 +688,48 @@ function renderMonthlyCalendar() {
     calendarCursor.setDate(1);
   }
 
-  const year = calendarCursor.getFullYear();
-  const month = calendarCursor.getMonth();
-
+  const y = calendarCursor.getFullYear();
+  const m = calendarCursor.getMonth();
   cal.innerHTML = "";
 
-  if (labelEl) {
-    const mm = String(month + 1).padStart(2, "0");
-    labelEl.textContent = `${year} / ${mm}`;
+  if (label) {
+    label.textContent = `${y} / ${String(m + 1).padStart(2, "0")}`;
   }
 
-  const firstDay = new Date(year, month, 1);
-  const firstWeekday = firstDay.getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const first = new Date(y, m, 1);
+  const firstW = first.getDay();
+  const daysIn = new Date(y, m + 1, 0).getDate();
 
-  const today = todayStart();
-  const todayKey = formatDateKey(today);
+  const t = todayStart();
+  const todayKey = formatDateKey(t);
 
-  // blanks
-  for (let i = 0; i < firstWeekday; i++) {
+  // blank cells
+  for (let i = 0; i < firstW; i++) {
     const cell = document.createElement("div");
     cell.className = "calendar-cell disabled";
     cal.appendChild(cell);
   }
 
-  // real days
-  for (let day = 1; day <= daysInMonth; day++) {
-    const d = new Date(year, month, day);
-    const dateKey = formatDateKey(d);
+  for (let d = 1; d <= daysIn; d++) {
+    const date = new Date(y, m, d);
+    const key = formatDateKey(date);
 
     const cell = document.createElement("div");
     cell.className = "calendar-cell";
 
     const num = document.createElement("div");
     num.className = "day-number";
-    num.textContent = day;
+    num.textContent = d;
     cell.appendChild(num);
 
-    if (d.getTime() === today.getTime()) {
-      cell.classList.add("today");
-    }
+    if (key === todayKey) cell.classList.add("today");
 
-    const evForDay = events.filter(e => e.date === dateKey);
-    if (evForDay.length > 0) cell.classList.add("has-event");
+    if (events.some(e => e.date === key)) cell.classList.add("has-event");
 
-    if (selectedDateKey === dateKey) cell.classList.add("selected");
+    if (key === selectedDateKey) cell.classList.add("selected");
 
     cell.addEventListener("click", () => {
-      selectedDateKey = dateKey;
+      selectedDateKey = key;
       renderMonthlyCalendar();
       renderCalendarPanel();
     });
@@ -434,11 +737,9 @@ function renderMonthlyCalendar() {
     cal.appendChild(cell);
   }
 
-  // default selection = today if in this month
   if (!selectedDateKey) {
-    const monthKeyCursor = `${year}-${String(month + 1).padStart(2, "0")}`;
-    const monthKeyToday = todayKey.slice(0, 7);
-    if (monthKeyCursor === monthKeyToday) {
+    const monthStr = `${y}-${String(m + 1).padStart(2, "0")}`;
+    if (todayKey.slice(0, 7) === monthStr) {
       selectedDateKey = todayKey;
     }
   }
@@ -452,7 +753,8 @@ function renderCalendarPanel() {
   const listEl = document.getElementById("calendarPanelEvents");
   const form = document.getElementById("calendarEventForm");
   const input = document.getElementById("calendarEventInput");
-  if (!panel || !dateEl || !listEl || !form || !input) return;
+  const reflection = document.getElementById("calendarReflection");
+  if (!panel) return;
 
   if (!selectedDateKey) {
     panel.style.display = "none";
@@ -470,10 +772,11 @@ function renderCalendarPanel() {
 
   const todaysEvents = events.filter(e => e.date === selectedDateKey);
   listEl.innerHTML = "";
+
   if (todaysEvents.length === 0) {
     const empty = document.createElement("div");
-    empty.textContent = "No events for this day.";
     empty.style.color = "var(--soft)";
+    empty.textContent = "No events.";
     empty.style.fontSize = "0.85rem";
     listEl.appendChild(empty);
   } else {
@@ -481,32 +784,47 @@ function renderCalendarPanel() {
       const row = document.createElement("div");
       row.className = "calendar-event-row";
 
-      const titleSpan = document.createElement("span");
-      titleSpan.textContent = ev.title;
+      const title = document.createElement("span");
+      title.textContent = ev.title;
 
-      const delBtn = document.createElement("button");
-      delBtn.className = "calendar-event-delete";
-      delBtn.textContent = "✕";
-      delBtn.addEventListener("click", () => {
-        // instant delete, no browser confirm
-        deleteEvent(ev.id);
-        renderMonthlyCalendar(); // re-renders + panel
+      const del = document.createElement("button");
+      del.className = "calendar-event-delete";
+      del.textContent = "✕";
+      del.addEventListener("click", () => {
+        events = events.filter(e => e.id !== ev.id);
+        saveEvents();
+        renderMonthlyCalendar();
       });
 
-      row.appendChild(titleSpan);
-      row.appendChild(delBtn);
+      row.appendChild(title);
+      row.appendChild(del);
       listEl.appendChild(row);
     });
+  }
+
+  if (reflection) {
+    reflection.value = getNoteForDate(selectedDateKey);
+    if (!reflection._bound) {
+      reflection.addEventListener("input", () => {
+        setNoteForDate(selectedDateKey, reflection.value);
+      });
+      reflection._bound = true;
+    }
   }
 
   if (!form._bound) {
     form.addEventListener("submit", e => {
       e.preventDefault();
-      const text = input.value.trim();
-      if (!text || !selectedDateKey) return;
-      addEvent(selectedDateKey, text);
+      const val = input.value.trim();
+      if (!val) return;
+      events.push({
+        id: `ev_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+        date: selectedDateKey,
+        title: val,
+      });
+      saveEvents();
       input.value = "";
-      renderMonthlyCalendar(); // also refreshes panel
+      renderMonthlyCalendar();
     });
     form._bound = true;
   }
@@ -516,21 +834,24 @@ function initCalendarNavigation() {
   const prev = document.getElementById("prevMonth");
   const next = document.getElementById("nextMonth");
   if (!prev || !next) return;
+
   prev.addEventListener("click", () => {
-    if (!calendarCursor) calendarCursor = new Date();
     calendarCursor.setMonth(calendarCursor.getMonth() - 1);
     selectedDateKey = null;
     renderMonthlyCalendar();
   });
+
   next.addEventListener("click", () => {
-    if (!calendarCursor) calendarCursor = new Date();
     calendarCursor.setMonth(calendarCursor.getMonth() + 1);
     selectedDateKey = null;
     renderMonthlyCalendar();
   });
 }
 
-// ---------- charts ----------
+// ==============================
+// Charts
+// ==============================
+
 function setupCanvas(canvas) {
   const rect = canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
@@ -540,17 +861,21 @@ function setupCanvas(canvas) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   return { ctx, width: rect.width, height: rect.height };
 }
-function drawBars(canvas, labels, values, emptyMessage) {
+
+function drawBars(canvas, labels, values, emptyText) {
   const { ctx, width, height } = setupCanvas(canvas);
   ctx.clearRect(0, 0, width, height);
+
   if (!labels.length) {
     ctx.fillStyle = "#9ca3af";
     ctx.font = "12px system-ui";
-    ctx.fillText(emptyMessage, 10, height / 2);
+    ctx.fillText(emptyText, 10, height / 2);
     return;
   }
+
   ctx.strokeStyle = "#1f2937";
   ctx.lineWidth = 1;
+
   const lines = 4;
   for (let i = 0; i <= lines; i++) {
     const y = 15 + ((height - 40) * i) / lines;
@@ -559,156 +884,219 @@ function drawBars(canvas, labels, values, emptyMessage) {
     ctx.lineTo(width - 10, y);
     ctx.stroke();
   }
+
   const maxVal = Math.max(1, ...values);
   const left = 30;
   const right = width - 10;
   const bottom = height - 25;
   const top = 10;
-  const chartWidth = right - left;
-  const chartHeight = bottom - top;
+
+  const chartW = right - left;
+  const chartH = bottom - top;
   const count = labels.length;
-  const barWidth = (chartWidth / count) * 0.7;
-  const gap = (chartWidth - barWidth * count) / (count - 1 || 1);
+
+  const barW = (chartW / count) * 0.7;
+  const gap = (chartW - barW * count) / (count - 1 || 1);
+
   values.forEach((v, i) => {
-    const x = left + i * (barWidth + gap);
-    const barHeight = (v / maxVal) * chartHeight;
-    const y = bottom - barHeight;
-    const grad = ctx.createLinearGradient(x, y, x, bottom);
-    grad.addColorStop(0, "rgba(34,197,94,0.9)");
-    grad.addColorStop(1, "rgba(34,197,94,0.25)");
-    ctx.fillStyle = grad;
-    const r = 5;
+    const x = left + i * (barW + gap);
+    const barH = (v / maxVal) * chartH;
+    const y = bottom - barH;
+
+    const g = ctx.createLinearGradient(x, y, x, bottom);
+    g.addColorStop(0, "rgba(34,197,94,0.9)");
+    g.addColorStop(1, "rgba(34,197,94,0.25)");
+    ctx.fillStyle = g;
+
+    const radius = 5;
     ctx.beginPath();
     ctx.moveTo(x, bottom);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.lineTo(x + barWidth - r, y);
-    ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + r);
-    ctx.lineTo(x + barWidth, bottom);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.lineTo(x + barW - radius, y);
+    ctx.quadraticCurveTo(x + barW, y, x + barW, y + radius);
+    ctx.lineTo(x + barW, bottom);
     ctx.closePath();
     ctx.fill();
   });
+
   ctx.fillStyle = "#9ca3af";
   ctx.font = "10px system-ui";
   ctx.textAlign = "center";
-  ctx.textBaseline = "top";
+
   labels.forEach((lab, i) => {
-    const x = left + i * (barWidth + gap) + barWidth / 2;
+    const x = left + i * (barW + gap) + barW / 2;
     ctx.fillText(lab, x, bottom + 3);
   });
 }
-function drawOverall(canvas, completed, total) {
+
+function drawDonut(canvas, completed, total) {
   const { ctx, width, height } = setupCanvas(canvas);
   ctx.clearRect(0, 0, width, height);
-  ctx.font = "12px system-ui";
-  ctx.fillStyle = "#9ca3af";
-  if (total === 0) {
-    ctx.fillText("No tasks in this week yet.", 10, height / 2);
-    return;
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = Math.min(width, height) / 2 - 18;
+  const lineWidth = 14;
+
+  const ratio = total > 0 ? completed / total : 0;
+
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = "#1f2937";
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  if (total > 0 && ratio > 0) {
+    const start = -Math.PI / 2;
+    const end = start + ratio * Math.PI * 2;
+    const g = ctx.createLinearGradient(cx, cy - radius, cx, cy + radius);
+    g.addColorStop(0, "rgba(34,197,94,1)");
+    g.addColorStop(1, "rgba(34,197,94,0.4)");
+    ctx.strokeStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, start, end);
+    ctx.stroke();
   }
-  const ratio = completed / total;
-  const barWidth = width - 60;
-  const barHeight = 16;
-  const x = 30;
-  const y = height / 2 - barHeight / 2;
-  ctx.fillStyle = "#1f2937";
-  ctx.beginPath();
-  ctx.roundRect(x, y, barWidth, barHeight, 999);
-  ctx.fill();
-  ctx.fillStyle = "#22c55e";
-  ctx.beginPath();
-  ctx.roundRect(x, y, barWidth * ratio, barHeight, 999);
-  ctx.fill();
-  const percent = Math.round(ratio * 100);
-  ctx.fillStyle = "#e5e7eb";
-  ctx.textBaseline = "bottom";
-  ctx.fillText(`${completed}/${total} tasks (${percent}%)`, x, y - 4);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  if (total === 0) {
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "12px system-ui";
+    ctx.fillText("No tasks", cx, cy);
+    return 0;
+  } else {
+    const percent = Math.round(ratio * 100);
+    ctx.fillStyle = "#e5e7eb";
+    ctx.font = "16px system-ui";
+    ctx.fillText(`${percent}%`, cx, cy - 4);
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "11px system-ui";
+    ctx.fillText(`${completed}/${total}`, cx, cy + 11);
+    return percent;
+  }
 }
 
 function renderWeeklyStatsPage() {
   const canvas = document.getElementById("weeklyStatsChart");
-  const text = document.getElementById("weeklyStatsText");
+  const txt = document.getElementById("weeklyStatsText");
   if (!canvas) return;
 
   const weekDates = getCurrentWeekDates();
   const labels = [];
   const values = [];
   const short = ["S","M","T","W","T","F","S"];
-  weekDates.forEach((d, idx) => {
+
+  weekDates.forEach((d, i) => {
     const key = formatDateKey(d);
-    labels.push(short[idx]);
+    labels.push(short[i]);
     values.push(dayTasks.filter(t => t.date === key && t.done).length);
   });
 
   const total = values.reduce((a,b)=>a+b,0);
   drawBars(canvas, labels, values, "No completed tasks this week yet.");
-  if (text) {
-    text.textContent =
+
+  if (txt) {
+    txt.textContent =
       total === 0
         ? "No tasks completed this week yet."
         : `${total} task${total !== 1 ? "s" : ""} completed this week.`;
   }
 }
+
 function renderMonthlyStatsPage() {
   const canvas = document.getElementById("monthlyStatsChart");
-  const text = document.getElementById("monthlyStatsText");
+  const txt = document.getElementById("monthlyStatsText");
   if (!canvas) return;
 
-  const currentWeekStart = getStartOfWeek(new Date());
+  const cw = getStartOfWeek(new Date());
   const labels = [];
   const values = [];
-  for (let offset = 3; offset >= 0; offset--) {
-    const start = new Date(currentWeekStart);
-    start.setDate(currentWeekStart.getDate() - offset * 7);
+
+  for (let off = 3; off >= 0; off--) {
+    const start = new Date(cw);
+    start.setDate(cw.getDate() - off * 7);
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
-    const startKey = formatDateKey(start);
-    const endKey = formatDateKey(end);
-    labels.push(offset === 0 ? "This wk" : `W-${offset}`);
-    values.push(dayTasks.filter(
-      t => t.done && t.date >= startKey && t.date <= endKey
-    ).length);
+
+    labels.push(off === 0 ? "This wk" : `W-${off}`);
+
+    values.push(
+      dayTasks.filter(
+        t => t.done &&
+        t.date >= formatDateKey(start) &&
+        t.date <= formatDateKey(end)
+      ).length
+    );
   }
+
   const total = values.reduce((a,b)=>a+b,0);
-  drawBars(canvas, labels, values, "No completed tasks in these 4 weeks.");
-  if (text) {
-    text.textContent =
+  drawBars(canvas, labels, values, "No completed tasks in last 4 weeks.");
+
+  if (txt) {
+    txt.textContent =
       total === 0
         ? "No tasks completed in the last 4 weeks."
-        : `${total} task${total !== 1 ? "s" : ""} completed across the last 4 weeks.`;
+        : `${total} task${total !== 1 ? "s" : ""} completed in the last 4 weeks.`;
   }
 }
-function renderOverallStatsPage() {
-  const canvas = document.getElementById("overallStatsChart");
-  const text = document.getElementById("overallStatsText");
+
+function renderOverallWeekCircle() {
+  const canvas = document.getElementById("overallWeekCircle");
+  const txt = document.getElementById("overallWeekText");
   if (!canvas) return;
 
   const weekDates = getCurrentWeekDates();
+  const todayKey = formatDateKey(todayStart());
   const startKey = formatDateKey(weekDates[0]);
-  const endKey = formatDateKey(weekDates[6]);
 
-  const inWeek = dayTasks.filter(t => t.date >= startKey && t.date <= endKey);
-  const completed = inWeek.filter(t => t.done).length;
+  const inRange = dayTasks.filter(t => t.date >= startKey && t.date <= todayKey);
+  const done = inRange.filter(t => t.done).length;
+  const total = inRange.length;
 
-  drawOverall(canvas, completed, inWeek.length);
-  if (text) {
-    if (inWeek.length === 0) text.textContent = "No tasks scheduled this week.";
-    else {
-      const percent = Math.round((completed / inWeek.length) * 100);
-      text.textContent = `Overall: ${completed}/${inWeek.length} tasks completed (${percent}%).`;
-    }
+  const percent = drawDonut(canvas, done, total);
+  if (txt) {
+    if (!total) txt.textContent = "No tasks yet this week.";
+    else txt.textContent = `${done}/${total} tasks (${percent}%).`;
   }
 }
 
-// ---------- settings ----------
-function initSettingsPage() {
-  const exportBtn = document.getElementById("exportData");
-  const importInput = document.getElementById("importFile");
-  const clearBtn = document.getElementById("clearAll");
+function renderOverallMonthCircle() {
+  const canvas = document.getElementById("overallMonthCircle");
+  const txt = document.getElementById("overallMonthText");
+  if (!canvas) return;
 
-  if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
-      const data = { dayTasks, todos, events };
+  const t = todayStart();
+  const todayKey = formatDateKey(t);
+  const monthStart = new Date(t.getFullYear(), t.getMonth(), 1);
+  const startKey = formatDateKey(monthStart);
+
+  const inRange = dayTasks.filter(t => t.date >= startKey && t.date <= todayKey);
+  const done = inRange.filter(t => t.done).length;
+  const total = inRange.length;
+
+  const percent = drawDonut(canvas, done, total);
+
+  if (txt) {
+    if (!total) txt.textContent = "No tasks yet this month.";
+    else txt.textContent = `${done}/${total} tasks (${percent}%).`;
+  }
+}
+
+// ==============================
+// Settings
+// ==============================
+
+function initSettingsPage() {
+  const exp = document.getElementById("exportData");
+  const imp = document.getElementById("importFile");
+  const clr = document.getElementById("clearAll");
+
+  if (exp) {
+    exp.addEventListener("click", () => {
+      const data = { dayTasks, habits, habitLog, events, dailyNotes };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -719,8 +1107,8 @@ function initSettingsPage() {
     });
   }
 
-  if (importInput) {
-    importInput.addEventListener("change", e => {
+  if (imp) {
+    imp.addEventListener("change", e => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -728,9 +1116,17 @@ function initSettingsPage() {
         try {
           const data = JSON.parse(ev.target.result);
           if (data.dayTasks) dayTasks = data.dayTasks;
-          if (data.todos) todos = data.todos;
+          if (data.habits) habits = data.habits;
+          if (data.habitLog) habitLog = data.habitLog;
           if (data.events) events = data.events;
-          saveDayTasks(); saveTodos(); saveEvents();
+          if (data.dailyNotes) dailyNotes = data.dailyNotes;
+
+          saveDayTasks();
+          saveHabits();
+          saveHabitLog();
+          saveEvents();
+          saveDailyNotes();
+
           alert("Import successful. Reloading.");
           location.reload();
         } catch {
@@ -741,32 +1137,63 @@ function initSettingsPage() {
     });
   }
 
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      if (!confirm("Clear ALL Vrix data?")) return;
-      dayTasks = []; todos = []; events = [];
-      saveDayTasks(); saveTodos(); saveEvents();
+  if (clr) {
+    clr.addEventListener("click", () => {
+      if (!confirm("Clear ALL data?")) return;
+
+      dayTasks = [];
+      habits = [];
+      habitLog = {};
+      events = [];
+      dailyNotes = {};
+
+      saveDayTasks();
+      saveHabits();
+      saveHabitLog();
+      saveEvents();
+      saveDailyNotes();
+
       alert("All data cleared.");
       location.reload();
     });
   }
 }
 
-// ---------- master render ----------
+// ==============================
+// Master Render
+// ==============================
+
 function renderAll() {
   renderWeeklyBoard();
-  renderTodoDashboard();
+  renderHabitsSection();
+  renderTodaySummary();
+  renderReflectionSection();
   renderMonthlyCalendar();
   renderWeeklyStatsPage();
   renderMonthlyStatsPage();
-  renderOverallStatsPage();
+  renderOverallWeekCircle();
+  renderOverallMonthCircle();
 }
 
-// ---------- init ----------
+// ==============================
+// Init App
+// ==============================
+
 document.addEventListener("DOMContentLoaded", () => {
   loadState();
   initTheme();
+  initSplash();
   renderAll();
   initCalendarNavigation();
   initSettingsPage();
 });
+
+// ==============================
+// Register SW
+// ==============================
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js");
+  });
+}

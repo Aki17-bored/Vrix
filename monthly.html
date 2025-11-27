@@ -2,16 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Vrix – Calendar</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#020617">
+
   <link rel="stylesheet" href="css/style.css">
   <script defer src="js/app.js"></script>
 </head>
 <body>
+<div id="splash" class="splash-screen">
+  <div class="splash-inner">
+    <img src="img/vrix-logo-192.png" alt="Vrix logo" class="splash-logo">
+    <h1 class="splash-title">Vrix</h1>
+    <p class="splash-tagline">Turn your day into a game.</p>
+  </div>
+</div>
+
 <header class="top-header">
-  <div class="logo">Vrix</div>
+  <div class="logo">
+    <img src="img/vrix-logo.png" alt="Vrix logo" class="logo-icon">
+    <span>Vrix</span>
+  </div>
   <nav>
     <a href="index.html">Dashboard</a>
-    <a href="weekly.html">Weekly & Monthly</a>
+    <a href="weekly.html">Stats</a>
     <a href="monthly.html" class="active">Calendar</a>
     <a href="settings.html">Settings</a>
   </nav>
@@ -19,42 +35,49 @@
 </header>
 
 <main class="container">
-  <h1>Monthly Calendar</h1>
-  <p class="small">Highlight exams, birthdays, special days and deadlines.</p>
+  <h1>Monthly calendar</h1>
+  <p class="small">Highlight exams, events and also view or edit your reflection for each day.</p>
 
   <div class="month-shell">
-  <div class="month-header">
-    <button id="prevMonth" class="month-nav">&lt;</button>
-    <div id="monthLabel" class="month-label">2025 / 11</div>
-    <button id="nextMonth" class="month-nav">&gt;</button>
-  </div>
-
-  <div class="calendar-weekdays">
-    <div>SUN</div><div>MON</div><div>TUE</div>
-    <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
-  </div>
-
-  <div id="calendar" class="calendar"></div>
-
-  <!-- NEW: event panel under calendar -->
-  <div id="calendarPanel" class="calendar-panel">
-    <div class="calendar-panel-title">Selected day</div>
-    <div id="calendarPanelDate" class="calendar-panel-date">
-      Tap a date in the calendar above.
+    <div class="month-header">
+      <button id="prevMonth" class="month-nav">&lt;</button>
+      <div id="monthLabel" class="month-label">2025 / 11</div>
+      <button id="nextMonth" class="month-nav">&gt;</button>
     </div>
 
-    <div id="calendarPanelEvents" class="calendar-panel-events">
-      <!-- filled by JS -->
+    <div class="calendar-weekdays">
+      <div>SUN</div><div>MON</div><div>TUE</div>
+      <div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
     </div>
 
-    <form id="calendarEventForm" class="calendar-event-form">
-      <input
-        id="calendarEventInput"
-        type="text"
-        placeholder="Add event for this day (e.g. Exam, Birthday)…"
-        autocomplete="off"
-      />
-      <button type="submit">Add</button>
-    </form>
+    <div id="calendar" class="calendar"></div>
+
+    <div id="calendarPanel" class="calendar-panel">
+      <div class="calendar-panel-title">Selected day</div>
+      <div id="calendarPanelDate" class="calendar-panel-date">
+        Tap a date in the calendar above.
+      </div>
+
+      <!-- Events for selected day -->
+      <div id="calendarPanelEvents" class="calendar-panel-events"></div>
+      <form id="calendarEventForm" class="calendar-event-form">
+        <input id="calendarEventInput" type="text"
+               placeholder="Add event for this day (e.g. Exam, Birthday)…"
+               autocomplete="off">
+        <button type="submit">Add</button>
+      </form>
+
+      <!-- Reflection for selected day -->
+      <div style="margin-top: 10px;">
+        <div class="calendar-panel-title">Reflection</div>
+        <p class="small" style="margin-bottom: 4px;">
+          This is the same reflection stored on the dashboard, but you can view and edit it for any day from here.
+        </p>
+        <textarea id="calendarReflection" class="note-input" rows="3"
+                  placeholder="Write or view your reflection for this day…"></textarea>
+      </div>
+    </div>
   </div>
-</div>
+</main>
+</body>
+</html>

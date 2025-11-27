@@ -2,16 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Vrix – Weekly & Monthly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vrix – Stats</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#020617">
+
   <link rel="stylesheet" href="css/style.css">
   <script defer src="js/app.js"></script>
 </head>
 <body>
+<div id="splash" class="splash-screen">
+  <div class="splash-inner">
+    <img src="img/vrix-logo-192.png" alt="Vrix logo" class="splash-logo">
+    <h1 class="splash-title">Vrix</h1>
+    <p class="splash-tagline">Turn your day into a game.</p>
+  </div>
+</div>
+
 <header class="top-header">
-  <div class="logo">Vrix</div>
+  <div class="logo">
+    <img src="img/vrix-logo.png" alt="Vrix logo" class="logo-icon">
+    <span>Vrix</span>
+  </div>
   <nav>
     <a href="index.html">Dashboard</a>
-    <a href="weekly.html" class="active">Weekly & Monthly</a>
+    <a href="weekly.html" class="active">Stats</a>
     <a href="monthly.html">Calendar</a>
     <a href="settings.html">Settings</a>
   </nav>
@@ -19,29 +35,43 @@
 </header>
 
 <main class="container">
-  <h1>Weekly & Monthly Dashboard</h1>
-  <p class="small">See completions for this week and last 4 weeks, plus your monthly calendar.</p>
+  <h1>Stats</h1>
+  <p class="small">See weekly and monthly completions and overall progress.</p>
 
-  <section style="margin-top:18px;display:grid;grid-template-columns:minmax(0,1.3fr)minmax(0,1fr);gap:14px;">
+  <section class="charts-two-column">
     <div>
       <div class="todo-box chart-card">
         <h2 class="todo-title">Weekly completions</h2>
         <canvas id="weeklyStatsChart"></canvas>
-        <p id="weeklyStatsText" class="small" style="margin-top:8px;"></p>
+        <p id="weeklyStatsText" class="small" style="margin-top: 8px;"></p>
       </div>
+
       <div class="todo-box chart-card">
-        <h2 class="todo-title">Monthly completions (last 4 weeks)</h2>
+        <h2 class="todo-title">Last 4 weeks</h2>
         <canvas id="monthlyStatsChart"></canvas>
-        <p id="monthlyStatsText" class="small" style="margin-top:8px;"></p>
+        <p id="monthlyStatsText" class="small" style="margin-top: 8px;"></p>
       </div>
     </div>
+
     <div class="todo-box chart-card">
-      <h2 class="todo-title">Overall progress (current week)</h2>
-      <canvas id="overallStatsChart"></canvas>
-      <p id="overallStatsText" class="small" style="margin-top:8px;"></p>
-      <p class="small" style="margin-top:6px;">Counts all tasks scheduled in the current week.</p>
+      <h2 class="todo-title">Overall progress</h2>
+      <div class="circle-row">
+        <div class="circle-box">
+          <h3>Week</h3>
+          <canvas id="overallWeekCircle" class="circle-chart"></canvas>
+          <p id="overallWeekText" class="small"></p>
+        </div>
+        <div class="circle-box">
+          <h3>Month</h3>
+          <canvas id="overallMonthCircle" class="circle-chart"></canvas>
+          <p id="overallMonthText" class="small"></p>
+        </div>
+      </div>
+      <p class="small" style="margin-top: 6px;">
+        Only tasks from today and past days are counted. Future tasks are excluded.
+      </p>
     </div>
   </section>
-
-  <section style="margin-top:24px;">
- 
+</main>
+</body>
+</html>
