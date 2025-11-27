@@ -1,88 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Vrix – Habit & Task Tracker</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#020617">
+    <title>Vrix – Dashboard</title>
 
-  <link rel="stylesheet" href="css/style.css">
-  <script defer src="js/quote.js"></script>
-  <script defer src="js/app.js"></script>
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#020617" />
+
+    <!-- Styles & Scripts -->
+    <link rel="stylesheet" href="css/style.css" />
+    <script defer src="js/quote.js"></script>
+    <script defer src="js/app.js"></script>
 </head>
+
 <body>
-<!-- VRIX SPLASH SCREEN -->
+
+<!-- ===============================
+      VRIX SPLASH SCREEN
+================================= -->
 <div id="splash" class="splash-screen">
-  <div class="splash-inner">
-    <img src="img/vrix-logo-192.png" alt="Vrix logo" class="splash-logo">
-    <h1 class="splash-title">Vrix</h1>
-    <p class="splash-tagline">Turn your day into a game.</p>
-  </div>
+    <div class="splash-inner">
+        <img src="img/vrix-logo-192.png" class="splash-logo" alt="Vrix Logo">
+        <h1 class="splash-title">Vrix</h1>
+        <p class="splash-tagline">Turn your day into a game.</p>
+    </div>
 </div>
 
+<!-- ===============================
+           HEADER
+================================= -->
 <header class="top-header">
-  <div class="logo">
-    <img src="img/vrix-logo.png" alt="Vrix logo" class="logo-icon">
-    <span>Vrix</span>
-  </div>
-  <nav>
-    <a href="index.html" class="active">Dashboard</a>
-    <a href="weekly.html">Stats</a>
-    <a href="monthly.html">Calendar</a>
-    <a href="settings.html">Settings</a>
-  </nav>
-  <button id="themeToggle" class="theme-btn">🌙</button>
+    <div class="logo">
+        <img src="img/vrix-logo.png" class="logo-icon" alt="Vrix Logo">
+        <span>Vrix</span>
+    </div>
+
+    <nav>
+        <a href="index.html" class="active">Dashboard</a>
+        <a href="weekly.html">Stats</a>
+        <a href="monthly.html">Calendar</a>
+        <a href="settings.html">Settings</a>
+    </nav>
+
+    <button id="themeToggle" class="theme-btn">🌙</button>
 </header>
 
+<!-- ===============================
+           MAIN CONTENT
+================================= -->
 <main class="container">
-  <!-- MOTIVATIONAL QUOTE -->
-  <section class="quote-box">
-    <div id="quoteText" class="quote-text"></div>
-    <p id="todayLabel" class="small quote-date"></p>
-  </section>
 
-  <!-- DAILY HABITS -->
-  <section class="todo-box">
-    <h2 class="todo-title">Daily Habits</h2>
-    <p class="small">
-      These repeat every day. Tick only for today. Streaks update automatically.
-    </p>
+    <!-- 1️⃣ MOTIVATIONAL QUOTE -->
+    <section class="quote-box">
+        <div id="quoteText" class="quote-text"></div>
+        <p id="todayLabel" class="small quote-date"></p>
+    </section>
 
-    <div id="habitList"></div>
+    <!-- 2️⃣ DAILY HABITS -->
+    <section class="todo-box">
+        <h2 class="todo-title">Daily Habits</h2>
+        <p class="small">These repeat every day. Ticking counts toward your streak.</p>
 
-    <form id="habitForm" class="add-task" style="margin-top: 10px;">
-      <input id="habitInput" type="text" placeholder="Add a habit (e.g. 🎯 Read 10 pages #study)" autocomplete="off">
-      <button type="submit">+</button>
-    </form>
+        <div id="habitList"></div>
 
-    <p id="overallStreakText" class="small" style="margin-top: 8px;"></p>
-  </section>
+        <form id="habitForm" class="add-task">
+            <input id="habitInput" type="text" placeholder="Add a habit (🎯, #tags)..." autocomplete="off">
+            <button type="submit">+</button>
+        </form>
 
-  <!-- COMPLETED TODAY -->
-  <section class="todo-box" style="margin-top: 16px;">
-    <h2 class="todo-title">Completed today</h2>
-    <p id="todayCompletedText" class="small"></p>
-    <div id="todayTagSummary" class="tag-summary"></div>
-  </section>
+        <p id="overallStreakText" class="small"></p>
+    </section>
 
-  <!-- WEEKLY TASK BOARD -->
-  <section style="margin-top: 24px;">
-    <h2 class="todo-title">This Week’s Tasks</h2>
-    <p class="small">
-      Tasks are specific to each day. Past days are locked. Future days show planned tasks only.
-      Use 🎯 for priority and #tags for grouping.
-    </p>
-    <div id="weekBoard" class="week-board"></div>
-  </section>
+    <!-- 3️⃣ COMPLETED TODAY SUMMARY -->
+    <section class="todo-box" style="margin-top: 16px;">
+        <h2 class="todo-title">Completed Today</h2>
+        <p id="todayCompletedText" class="small"></p>
+        <div id="todayTagSummary" class="tag-summary"></div>
+    </section>
 
-  <!-- DAILY REFLECTION NOTE -->
-  <section class="todo-box" style="margin-top: 24px;">
-    <h2 class="todo-title">Today’s reflection</h2>
-    <p class="small">Write a quick note about your day or progress. This will also be visible from the calendar.</p>
-    <textarea id="todayNote" class="note-input" rows="3" placeholder="How did today go?"></textarea>
-  </section>
+    <!-- 4️⃣ WEEKLY SCHEDULE / TASKS -->
+    <section style="margin-top: 24px;">
+        <h2 class="todo-title">This Week’s Tasks</h2>
+        <p class="small">Add tasks for each day. Past days are locked. Future tasks cannot be ticked.</p>
+
+        <div id="weekBoard" class="week-board"></div>
+    </section>
+
+    <!-- 5️⃣ TODAY'S REFLECTION -->
+    <section class="todo-box" style="margin-top: 24px;">
+        <h2 class="todo-title">Today’s Reflection</h2>
+        <p class="small">Write a note about your day. This is saved automatically and appears on the calendar.</p>
+
+        <textarea id="todayNote" class="note-input" rows="3" placeholder="How did today go?"></textarea>
+    </section>
+
 </main>
+
+<!-- ===============================
+      SERVICE WORKER REGISTER
+================================= -->
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+    });
+}
+</script>
+
 </body>
 </html>
