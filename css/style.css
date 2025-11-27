@@ -1,265 +1,239 @@
-/* ==============================
+/* ============================================
    VRIX – GLOBAL THEME
-============================== */
+============================================ */
 :root {
-    --bg: #020617;
-    --card: #020617;
-    --text: #e2e8f0;
-    --soft: #94a3b8;
+    --bg: #0b1220;
+    --card: #111827;
+    --text: #f1f5f9;
+    --soft: #9ca3af;
+    --border: #1e293b;
     --primary: #22c55e;
-    --primary-soft: rgba(34, 197, 94, 0.26);
-    --border: #1f2937;
-    --radius: 16px;
+    --primary-soft: rgba(34, 197, 94, 0.18);
 }
 
-/* light mode */
-.light {
-    --bg: #f8fafc;
+:root.light {
+    --bg: #f9fafb;
     --card: #ffffff;
     --text: #0f172a;
     --soft: #64748b;
-    --border: #e2e8f0;
+    --border: #e5e7eb;
+    --primary: #22c55e;
+    --primary-soft: rgba(34,197,94,0.15);
 }
 
-/* base */
 * {
-    box-sizing: border-box;
-}
-body {
     margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, sans-serif;
+}
+
+body {
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    padding-bottom: 70px; /* space for mobile nav */
 }
 
-/* scrollbar */
-*::-webkit-scrollbar {
-    width: 6px;
-}
-*::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 8px;
-}
-
-/* ==============================
-   HEADER / NAV
-============================== */
+/* ============================================
+   TOP HEADER (Desktop Only)
+============================================ */
 .top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
     background: var(--card);
     border-bottom: 1px solid var(--border);
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 50;
 }
 
 .logo {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--primary);
 }
 
 .logo-icon {
-    width: 26px;
-    height: 26px;
-    object-fit: contain;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
 }
 
 nav {
     display: flex;
-    gap: 14px;
-    font-size: 0.9rem;
-    flex-wrap: wrap;
+    gap: 26px;
+    align-items: center;
 }
 
 nav a {
-    color: var(--soft);
+    font-size: 1rem;
+    color: var(--text);
     text-decoration: none;
-    font-weight: 500;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
     border-bottom: 2px solid transparent;
 }
 
 nav a.active {
-    color: var(--primary);
     border-bottom-color: var(--primary);
+    color: var(--primary);
 }
 
+/* Theme toggle */
 .theme-btn {
-    border-radius: 999px;
-    border: 1px solid var(--soft);
-    background: transparent;
-    color: var(--text);
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-/* ==============================
-   LAYOUT
-============================== */
-.container {
-    padding: 16px;
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
-.small {
-    font-size: 0.88rem;
-    color: var(--soft);
-}
-
-/* cards */
-.card, .todo-box, .month-shell, .settings-item {
-    background: var(--card);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 12px 14px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.4);
-}
-
-/* note textarea */
-.note-input {
-    width: 100%;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    background: transparent;
-    color: var(--text);
     padding: 8px 10px;
-    font-family: inherit;
-    font-size: 0.9rem;
-}
-
-/* ==============================
-   MOTIVATIONAL QUOTE
-============================== */
-.quote-box {
-    margin-bottom: 18px;
-    padding: 14px 16px 10px;
-    border-radius: var(--radius);
+    background: var(--card);
     border: 1px solid var(--border);
-    background: radial-gradient(circle at top left, rgba(34,197,94,0.18), transparent 55%);
+    color: var(--text);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.2rem;
 }
 
-.quote-text {
-    font-size: 1.1rem;
-    font-weight: 500;
-    min-height: 1.6em;
-    white-space: pre-wrap;
-    position: relative;
+/* ============================================
+   SPLASH SCREEN
+============================================ */
+.splash-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 1;
+    transition: opacity 0.6s ease;
 }
-
-/* blinking caret */
-.quote-text::after {
-    content: "";
-    display: inline-block;
-    width: 2px;
-    height: 1.1em;
-    margin-left: 4px;
-    background: var(--primary);
-    vertical-align: bottom;
-    animation: caretBlink 1s steps(1, start) infinite;
+.splash-hide {
+    opacity: 0;
+    pointer-events: none;
 }
-
-@keyframes caretBlink {
-    50% { opacity: 0; }
+.splash-inner {
+    text-align: center;
 }
-
-.quote-date {
+.splash-logo {
+    width: 90px;
+    height: 90px;
+}
+.splash-title {
+    margin-top: 10px;
+    font-size: 2rem;
+    font-weight: bold;
+}
+.splash-tagline {
+    color: var(--soft);
     margin-top: 4px;
 }
 
-/* ==============================
-   WEEKLY DASHBOARD
-============================== */
+/* ============================================
+   MAIN CONTAINER
+============================================ */
+.container {
+    padding: 20px;
+}
+
+/* Quote Box */
+.quote-box {
+    background: var(--card);
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+.quote-text {
+    font-size: 1.05rem;
+    line-height: 1.5rem;
+}
+.quote-date {
+    margin-top: 6px;
+    color: var(--soft);
+}
+
+/* ============================================
+   TASK / HABIT BOXES
+============================================ */
+.todo-title {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+}
+
+.todo-box {
+    background: var(--card);
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+
+.small {
+    font-size: 0.85rem;
+    color: var(--soft);
+}
+
+/* Add new task input */
+.add-task {
+    display: flex;
+    margin-top: 12px;
+}
+.add-task input {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 10px 0 0 10px;
+}
+.add-task button {
+    width: 46px;
+    background: var(--primary);
+    border: none;
+    border-radius: 0 10px 10px 0;
+    color: black;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+/* ============================================
+   WEEKLY BOARD
+============================================ */
 .week-board {
-    margin-top: 18px;
     display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+@media (min-width: 700px) {
+    .week-board {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .day-box {
     background: var(--card);
-    border-radius: var(--radius);
+    border-radius: 16px;
+    padding: 14px;
     border: 1px solid var(--border);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.day-past {
-    opacity: 0.7;
-}
-
-.day-future {
-    border-style: dashed;
-    border-color: rgba(148, 163, 184, 0.6);
 }
 
 .day-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 6px;
+    margin-bottom: 10px;
 }
 
 .day-name {
     font-weight: 600;
-    font-size: 0.98rem;
 }
-
 .day-date {
-    font-size: 0.8rem;
     color: var(--soft);
 }
 
-/* ring */
-.ring {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: conic-gradient(var(--primary) calc(var(--p) * 1%), #334155 0);
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-.ring::before {
-    content: "";
-    position: absolute;
-    inset: 8px;
-    background: var(--card);
-    border-radius: 50%;
-}
-.ring-value {
-    position: relative;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-.ring-caption {
-    font-size: 0.8rem;
-    color: var(--soft);
-    text-align: center;
-}
-
-/* tasks in day */
-.task-list {
-    max-height: 150px;
-    overflow-y: auto;
-    padding-top: 6px;
-    border-top: 1px dashed rgba(148, 163, 184, 0.4);
-}
-
-/* ========== TASK ROW + ANIMATIONS ========== */
+/* ============================================
+   TASK ROW + ANIMATIONS
+============================================ */
 .task-row {
     display: flex;
     align-items: flex-start;
@@ -268,535 +242,130 @@ nav a.active {
     border-radius: 10px;
     margin-bottom: 4px;
     background: rgba(15, 23, 42, 0.8);
-
-    /* animation + transitions */
-    transition:
-        background 0.25s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        opacity 0.2s ease;
+    transition: background 0.25s ease, transform 0.25s ease, opacity 0.25s ease;
 }
-
-/* appears with small pop-in */
-.task-row-appear {
-    animation: vrixRowIn 0.22s ease-out;
-}
-
-@keyframes vrixRowIn {
-    from {
-        opacity: 0;
-        transform: translateY(6px) scale(0.97);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* completed state */
 .task-row.completed {
     background: var(--primary-soft);
     border: 1px solid var(--primary);
-    transform: translateY(1px) scale(0.99);
+    transform: scale(0.98);
 }
 
-/* subtle hover on devices with hover */
-@media (hover: hover) {
-    .task-row:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
-    }
+.task-row-appear {
+    animation: taskAppear 0.25s ease-out;
+}
+@keyframes taskAppear {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* priority highlight */
-.priority-row {
-    box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.8);
-}
-
-/* task main text + tags */
 .task-main {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
 }
-
 .task-title {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
 }
-
 .tag-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
     margin-top: 2px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
 }
-
 .tag-pill {
-    padding: 2px 6px;
+    font-size: 0.75rem;
+    background: var(--border);
+    padding: 2px 7px;
     border-radius: 999px;
-    font-size: 0.7rem;
-    border: 1px solid rgba(148, 163, 184, 0.6);
-    color: var(--soft);
-    background: rgba(15, 23, 42, 0.7);
 }
-
 .priority-pill {
-    border-color: #facc15;
-    color: #facc15;
+    background: rgba(255, 0, 0, 0.25);
+    border: 1px solid red;
 }
-
-/* delete */
 .delete-btn {
+    background: none;
     border: none;
-    background: transparent;
-    color: #ef4444;
+    font-size: 1.1rem;
     cursor: pointer;
-    font-size: 1rem;
-}
-
-/* add task */
-.add-task {
-    margin-top: 6px;
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.add-task input {
-    flex: 1 1 140px;
-    padding: 5px 7px;
-    border-radius: 999px;
-    border: 1px solid #334155;
-    background: transparent;
-    color: var(--text);
-    font-size: 0.8rem;
-}
-
-.add-task button {
-    padding: 5px 10px;
-    border-radius: 999px;
-    border: none;
-    background: var(--primary);
-    color: #0f172a;
-    cursor: pointer;
-}
-
-.add-task button:hover {
-    filter: brightness(1.05);
-}
-
-/* ==============================
-   DAILY HABITS
-============================== */
-#habitList .task-row {
-    margin-bottom: 6px;
-}
-
-/* ==============================
-   PHONE-STYLE MONTH VIEW
-============================== */
-.month-shell {
-    margin-top: 16px;
-}
-
-/* header year/month */
-.month-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.month-label {
-    font-size: 1.4rem;
-    font-weight: 600;
-}
-
-.month-nav {
-    background: transparent;
-    border: 1px solid #475569;
-    color: var(--text);
-    width: 28px;
-    height: 28px;
-    border-radius: 999px;
-    cursor: pointer;
-}
-
-/* weekday row */
-.calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    font-size: 0.78rem;
     color: var(--soft);
-    text-align: center;
-    margin-bottom: 6px;
 }
 
-/* grid of days */
-.calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    row-gap: 12px;
-}
-
-/* individual day */
-.calendar-cell {
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-}
-
-.calendar-cell.disabled {
-    cursor: default;
-    opacity: 0.2;
-}
-
-.day-number {
-    min-width: 26px;
-    height: 26px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.86rem;
-}
-
-.calendar-cell.today .day-number {
-    background: #2563eb;
-    color: #ffffff;
-}
-
-.calendar-cell.selected .day-number {
-    outline: 1px solid var(--primary);
-}
-
-.calendar-cell.has-event::after {
-    content: "";
-    position: absolute;
-    bottom: 4px;
-    width: 4px;
-    height: 4px;
+/* ============================================
+   CIRCLES
+============================================ */
+.ring {
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    background: var(--primary);
-}
-
-/* ---------- Calendar event panel ---------- */
-.calendar-panel {
-    margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-}
-
-.calendar-panel-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.calendar-panel-date {
-    font-size: 0.85rem;
-    color: var(--soft);
-    margin-bottom: 6px;
-}
-
-.calendar-panel-events {
-    font-size: 0.85rem;
-    margin-bottom: 8px;
-}
-
-.calendar-event-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 4px;
-}
-
-.calendar-event-row span {
-    flex: 1;
-}
-
-.calendar-event-delete {
-    border: none;
-    background: transparent;
-    color: #ef4444;
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.calendar-event-form {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.calendar-event-form input {
-    flex: 1 1 160px;
-    padding: 5px 7px;
-    border-radius: 999px;
-    border: 1px solid #334155;
-    background: transparent;
-    color: var(--text);
-    font-size: 0.8rem;
-}
-
-.calendar-event-form button {
-    padding: 5px 10px;
-    border-radius: 999px;
-    border: none;
-    background: var(--primary);
-    color: #0f172a;
-    cursor: pointer;
-}
-
-/* ==============================
-   CHARTS
-============================== */
-.chart-card {
-    margin-top: 18px;
-}
-
-.chart-card canvas {
-    width: 100%;
-    height: 180px;
-    display: block;
-}
-
-.circle-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 6px;
-}
-
-.circle-box h3 {
-    margin: 0 0 4px;
-    font-size: 0.9rem;
-    color: var(--soft);
-}
-
-.circle-chart {
-    width: 100%;
-    height: 140px;
-    display: block;
-}
-
-/* ==============================
-   SETTINGS
-============================== */
-.settings-list {
-    margin-top: 20px;
-    display: grid;
-    gap: 12px;
-}
-
-.settings-item button {
-    margin-top: 8px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    border: none;
-    background: var(--primary);
-    color: #0f172a;
-    cursor: pointer;
-}
-
-/* ==============================
-   TAGS & TODAY SUMMARY
-============================== */
-
-.tag-summary {
-    margin-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.tag-summary-empty {
-    font-size: 0.85rem;
-    color: var(--soft);
-}
-
-/* ==============================
-   LIGHT MODE FIXES
-============================== */
-
-/* Make daily tasks clearly visible in light mode */
-.light .task-row {
-    background: #f1f5f9;
-}
-
-.light .task-row.completed {
-    background: #bbf7d0;
-    border-color: #22c55e;
-}
-
-.light .tag-pill {
-    background: #e2e8f0;
-    color: #475569;
-    border-color: #cbd5f5;
-}
-
-/* Priority highlight still visible */
-.light .priority-row {
-    box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.9);
-}
-
-/* ============================
-   Vrix Splash Screen
-============================ */
-.splash-screen {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at top, #22c55e33, #020617 55%);
+    background: conic-gradient(var(--primary) calc(var(--p) * 1%), var(--border) 0);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
 }
-
-.splash-inner {
-    text-align: center;
-    padding: 24px 28px;
-    border-radius: 24px;
-    border: 1px solid rgba(148, 163, 184, 0.5);
-    background: rgba(15, 23, 42, 0.92);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
-}
-
-.splash-logo {
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
-    object-fit: cover;
-    margin-bottom: 10px;
-}
-
-.splash-title {
-    margin: 0;
-    font-size: 1.8rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.splash-tagline {
-    margin-top: 6px;
-    font-size: 0.9rem;
-    color: var(--soft);
-}
-
-/* fade-out class */
-.splash-hide {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-/* light mode tweaks for splash */
-.light .splash-inner {
-    background: rgba(248, 250, 252, 0.96);
-    color: #0f172a;
-}
-.light .splash-tagline {
-    color: #475569;
-}
-
-/* ============================
-    Developer Info Box
-============================ */
-.dev-box {
-    margin-top: 32px;
-    background: var(--card);
-    padding: 18px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.dev-card {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.dev-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 2px solid #22c55e;
-    object-fit: cover;
-}
-
-.dev-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.dev-name {
-    margin: 0 0 6px;
-    font-size: 1.2rem;
-    font-weight: 600;
+.ring-value {
     color: var(--text);
+    font-weight: bold;
+}
+.ring-caption {
+    text-align: center;
+    margin-top: 6px;
+    color: var(--soft);
+    font-size: 0.85rem;
 }
 
-.dev-line {
-    margin: 2px 0;
-    font-size: 0.9rem;
+/* ============================================
+   NOTES
+============================================ */
+.note-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: 12px;
+    color: var(--text);
+    margin-top: 8px;
 }
 
-.dev-line a {
-    color: #22c55e;
-    text-decoration: none;
-}
+/* ============================================
+   BOTTOM NAVIGATION BAR (Mobile)
+============================================ */
+@media (max-width: 700px) {
 
-.dev-line a:hover {
-    text-decoration: underline;
-}
-
-/* ==============================
-   RESPONSIVE
-============================== */
-.charts-two-column {
-    margin-top: 18px;
-    display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    gap: 14px;
-}
-
-@media (max-width: 900px) {
-    .charts-two-column {
-        grid-template-columns: 1fr;
-    }
-    .circle-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    .dev-card {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .dev-avatar {
-        width: 90px;
-        height: 90px;
-    }
-}
-
-@media (max-width: 480px) {
+    /* Top header becomes compact */
     .top-header {
-        justify-content: center;
-        text-align: center;
+        padding: 12px 16px;
     }
+
     nav {
-        justify-content: center;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        background: var(--card);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -6px 14px rgba(0,0,0,0.6);
+        z-index: 99;
     }
+
+    nav a {
+        flex: 1;
+        text-align: center;
+        padding-top: 6px;
+        padding-bottom: 4px;
+        color: var(--soft);
+        border-radius: 12px;
+        border-bottom: none;
+        font-size: 0.8rem;
+    }
+
+    nav a.active {
+        background: rgba(34,197,94,0.14);
+        color: var(--primary);
+    }
+
     .container {
-        padding: 12px;
+        padding-bottom: 90px; /* Leave space for bottom nav */
     }
 }
